@@ -1,6 +1,7 @@
 #include "HID-Project.h"
 
-// declare hid  /////////////
+
+
 
 const int pinLed = LED_BUILTIN;
 const int pinButton1 = 9;
@@ -9,18 +10,21 @@ const int pinButton3 = 14;
 const int pinButton4 = 16;
 const int pinButton5 = 15;
 const int pinButtonProfile = 6;
-
+// pines Estado////////////////
 const int profileLed1 = 7;
 const int profileLed2 = 8;
+//////////////////////////////
 
-
-const int bootState = 2;
+// Declaracion de Estados///////
+const int bootState = 2; //////Estado predeterminado
 const int firstState=0;
 const int secondState=1;
 const int thirdState=2;
-int currentState = bootState;
 
+int currentState = bootState;// Cuando bootea selecciona el modo predeterminado
+///////////////////////////////
 
+bool muted= false; //------------------> En construccion
 
 ///////////////////////////////
 //char ctrlKey = KEY_LEFT_CTRL;
@@ -48,7 +52,7 @@ void setup() {
   // hid setup ////////////////
   pinMode(pinLed, OUTPUT);
   pinMode(profileLed1, OUTPUT);
-   pinMode(profileLed2, OUTPUT);
+  pinMode(profileLed2, OUTPUT);
   pinMode(pinButton, INPUT_PULLUP);
   pinMode(pinButtonProfile, INPUT_PULLUP);
   pinMode(pinButton1, INPUT_PULLUP);
@@ -56,9 +60,11 @@ void setup() {
   pinMode(pinButton3, INPUT_PULLUP);
   pinMode(pinButton4, INPUT_PULLUP);
   pinMode(pinButton5, INPUT_PULLUP);
+  
   // Sends a clean report to the host. This is important on any Arduino type.
   Consumer.begin();
-   Keyboard.begin();
+  Keyboard.begin();
+  
   ////////////////////////////
 
   // surface dial setup //////
@@ -77,7 +83,10 @@ void setup() {
 }
 
 void ledControl(){
-  
+  if (muted){
+  ////////////////////////////////////////////////// blink without delay  
+  }
+  else{
   switch(currentState){
      case firstState :
      digitalWrite(profileLed1,LOW);
@@ -97,11 +106,17 @@ void ledControl(){
      if (currentState != firstState && currentState != secondState && currentState != thirdState ){
         digitalWrite(profileLed1,LOW);
         digitalWrite(profileLed2, LOW);
+    currentState= bootState;
       }
     }
+  }
   
 }
 
+
+// ESTADOS -- Estados predeterminados /////////////
+
+//ESTADO 1 -- Control general(Surface Dial) //
 void firstStatefunction(){
   
   bool buttonValue = digitalRead(pinButton);
@@ -115,10 +130,10 @@ void firstStatefunction(){
   }
 
   if(counter >= 4) {
-    SurfaceDial.rotate(10);
+    SurfaceDial.rotate(20);
     counter -= 4;
   } else if(counter <= -4) {
-    SurfaceDial.rotate(-10);
+    SurfaceDial.rotate(-20);
     counter += 4;
   } 
   
@@ -179,7 +194,9 @@ void firstStatefunction(){
   }
 
   }
-  
+/////////////////////////////////////////////
+
+//ESTADO 2 -- Control general(No Dial) ///////
 void secondStatefunction(){
   
     if (!digitalRead(pinButton1)) {
@@ -246,23 +263,28 @@ void secondStatefunction(){
     digitalWrite(pinLed, LOW);
   }
 }
-  
+/////////////////////////////////////////////
+
+//ESTADO 3 -- Control general(Vol  Dial) // ----------> predeterminado
 void thirdStatefunction(){
   
   bool buttonValue = digitalRead(pinButton);
   
-  if(counter >= 6) {
+  if(counter >= 4) {
     Consumer.write(MEDIA_VOLUME_UP);
-    delay(50);
-    counter -= 6;
+    
+    
+    counter -= 4;
   
-  } else if(counter <= -6) {
+  } else if(counter <= -4) {
    Consumer.write(MEDIA_VOLUME_DOWN);
-   delay(50);
-    counter += 6;
+   
+   
+    counter += 4;
   
-  } 
+  }
 
+  
   if (!digitalRead(pinButton1)) {
     digitalWrite(pinLed, HIGH);
 
@@ -298,12 +320,14 @@ void thirdStatefunction(){
     // Simple debounce
     delay(300);
     digitalWrite(pinLed, LOW);
+
   }
 
   
   if (!digitalRead(pinButton4)) {
+    
     digitalWrite(pinLed, HIGH);
-
+    
     // See HID Project documentation for more Consumer keys
     Keyboard.press(KEY_RIGHT_ALT);
     delay(200);
@@ -315,6 +339,7 @@ Keyboard.releaseAll();
     // Simple debounce
     delay(300);
     digitalWrite(pinLed, LOW);
+
   }
 
   
@@ -335,7 +360,12 @@ Keyboard.releaseAll();
   }
 
   }
+//////////////////////////////////////////
+
+//////////////////////////////////////////////////
+
   
+// State control -- Estado en función de botón ////
 void statecontrolFunction(){   
   if (!digitalRead(pinButtonProfile)) {
     digitalWrite(pinLed, HIGH);
@@ -350,13 +380,15 @@ void statecontrolFunction(){
     delay(450);
     
   }
+  if(!muted){
   ledControl();
+  }
     
   }
+//////////////////////////////////////////////////
 
 
-// funcion changed ///////////
-
+// ROTATORY ENCODER -- Posicionamiento //////////// 
 void changed() {
   int A = digitalRead(pinA); 
   int B = digitalRead(pinB);
@@ -377,14 +409,67 @@ void changed() {
      combined == 0b1000) {
     counter--;
   }
-
   previous = current;
 }
+//////////////////////////////////////////////////
 
-//////////////////////////////
+// Non delay blink -- blinker for muted non delayed ////
+// Credits : https://learn.adafruit.com/multi-tasking-the-arduino-part-1/a-classy-solution //////
+class Flasher
+{
+  // Class Member Variables
+  // These are initialized at startup
+  int ledPin;      // the number of the LED pin
+  long OnTime;     // milliseconds of on-time
+  long OffTime;    // milliseconds of off-time
+
+  // These maintain the current state
+  int ledState;                 // ledState used to set the LED
+  unsigned long previousMillis;   // will store last time LED was updated
+
+  // Constructor - creates a Flasher 
+  // and initializes the member variables and state
+  public:
+  Flasher(int pin, long on, long off)
+  {
+  ledPin = pin;
+  pinMode(ledPin, OUTPUT);     
+    
+  OnTime = on;
+  OffTime = off;
+  
+  ledState = LOW; 
+  previousMillis = 0;
+  }
+
+  void Update()
+  {
+    // check to see if it's time to change the state of the LED
+    unsigned long currentMillis = millis();
+     
+    if((ledState == HIGH) && (currentMillis - previousMillis >= OnTime))
+    {
+      ledState = LOW;  // Turn it off
+      previousMillis = currentMillis;  // Remember the time
+      digitalWrite(ledPin, ledState);  // Update the actual LED
+    }
+    else if ((ledState == LOW) && (currentMillis - previousMillis >= OffTime))
+    {
+      ledState = HIGH;  // turn it on
+      previousMillis = currentMillis;   // Remember the time
+      digitalWrite(ledPin, ledState);   // Update the actual LED
+    }
+  }
+};
+
+
+Flasher led1(profileLed1, 100, 400);
+Flasher led2(profileLed2, 100, 400);
+///////////////////////////////////////////////
 
 void loop() {
-  
+ led1.Update();
+ led2.Update();  
 statecontrolFunction();
   switch(currentState){
      case firstState :
