@@ -33,12 +33,12 @@ my full set up
  - Another push button to turn on/off the pc
  - Two 6 pin connectors(two pins for powering on/off & four for usb )
   
-![alt text](https://i.ebayimg.com/images/i/182071474659-0-0/s-l140/p.jpg)
+       ![alt text](https://i.ebayimg.com/images/i/182071474659-0-0/s-l140/p.jpg)
  
  
  - Two meters of 6 core cable (depending on your mobo on/off pins if they work by grounding you could make it with just five core and 5       pins connectors)
  
- ![alt text](https://i.ebayimg.com/images/i/301725499558-0-0/s-l140/p.jpg)
+       ![alt text](https://i.ebayimg.com/images/i/301725499558-0-0/s-l140/p.jpg)
  
  - Motherboard usb conector
  - Blank backplate from pc box expanding ports
