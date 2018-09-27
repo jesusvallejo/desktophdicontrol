@@ -7,6 +7,9 @@ So i decided to make a box with some basic hid functions , at first i though of 
 it fitted almost all my needs, and the ones that didn't like muting discord where achive by making some macros with the pro-micro keyboard capabilities:
 >https://www.sparkfun.com/products/12640
 >
+
+![alt text](https://cdn.sparkfun.com//assets/parts/9/3/2/6/12640-01a.jpg)
+
 BEWARE!!! THERE ARE TWO MODELS THE 5V AND THE 3.3V NOT SELECTING THE CORRECT MODEL IN ARDUINO IDE WILL BRICK YOUR PRO-MICRO,IT CAN BE RECOVERED AS SHOWN IN HERE(this happened to me so please be carefull):
 >https://learn.sparkfun.com/tutorials/pro-micro--fio-v3-hookup-guide/troubleshooting-and-faq
 >
@@ -29,9 +32,14 @@ my full set up
  - All above
  - Another push button to turn on/off the pc
  - Two 6 pin connectors(two pins for powering on/off & four for usb )
+  
   ![alt text](https://i.ebayimg.com/images/i/182071474659-0-0/s-l140/p.jpg)
+ 
+ 
  - Two meters of 6 core cable (depending on your mobo on/off pins if they work by grounding you could make it with just five core and 5       pins connectors)
-   https://i.ebayimg.com/images/i/301725499558-0-0/s-l140/p.jpg
+ 
+   ![alt text](https://i.ebayimg.com/images/i/301725499558-0-0/s-l140/p.jpg)
+ 
  - Motherboard usb conector
  - Blank backplate from pc box expanding ports
  
