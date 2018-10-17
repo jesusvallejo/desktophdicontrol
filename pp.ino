@@ -25,6 +25,7 @@ int currentState = bootState;// Cuando bootea selecciona el modo predeterminado
 ///////////////////////////////
 
 bool muted= false; //------------------> En construccion
+bool muted2= false; //------------------> En construccion
 
 ///////////////////////////////
 //char ctrlKey = KEY_LEFT_CTRL;
@@ -64,6 +65,7 @@ void setup() {
   // Sends a clean report to the host. This is important on any Arduino type.
   Consumer.begin();
   Keyboard.begin();
+
   
   ////////////////////////////
 
@@ -83,10 +85,7 @@ void setup() {
 }
 
 void ledControl(){
-  if (muted){
-  ////////////////////////////////////////////////// blink without delay  
-  }
-  else{
+  if (!muted && !muted2){
   switch(currentState){
      case firstState :
      digitalWrite(profileLed1,LOW);
@@ -104,13 +103,13 @@ void ledControl(){
 
      default :
      if (currentState != firstState && currentState != secondState && currentState != thirdState ){
-        digitalWrite(profileLed1,LOW);
-        digitalWrite(profileLed2, LOW);
-    currentState= bootState;
-      }
+     digitalWrite(profileLed1,LOW);
+     digitalWrite(profileLed2, LOW);
+     currentState= bootState;
+      
     }
   }
-  
+  }
 }
 
 
@@ -272,14 +271,10 @@ void thirdStatefunction(){
   
   if(counter >= 4) {
     Consumer.write(MEDIA_VOLUME_UP);
-    
-    
     counter -= 4;
   
   } else if(counter <= -4) {
-   Consumer.write(MEDIA_VOLUME_DOWN);
-   
-   
+    Consumer.write(MEDIA_VOLUME_DOWN);
     counter += 4;
   
   }
@@ -289,9 +284,9 @@ void thirdStatefunction(){
     digitalWrite(pinLed, HIGH);
 
     // See HID Project documentation for more Consumer keys
-   Consumer.write(MEDIA_VOLUME_MUTE);
-
-    // Simple debounce
+   //Consumer.write(MEDIA_VOLUME_MUTE);
+   Consumer.write(HID_CONSUMER_MICROPHONE_CA);
+    // Simple debounce 
     delay(300);
     digitalWrite(pinLed, LOW);
   }
@@ -310,35 +305,34 @@ void thirdStatefunction(){
 
 
   if (!digitalRead(pinButton3)) {
-    digitalWrite(pinLed, HIGH);
-
-    // See HID Project documentation for more Consumer keys
+    if(!muted)
+    muted=true;
+    else
+    muted=false;
     Keyboard.press(KEY_RIGHT_ALT);
     Keyboard.press('P');
-    
-     Keyboard.releaseAll();
+    Keyboard.releaseAll();
     // Simple debounce
     delay(300);
-    digitalWrite(pinLed, LOW);
+    
 
   }
 
   
   if (!digitalRead(pinButton4)) {
     
-    digitalWrite(pinLed, HIGH);
+ 
+    if(!muted2)
+    muted2=true;
+    else
+    muted2=false;
     
-    // See HID Project documentation for more Consumer keys
     Keyboard.press(KEY_RIGHT_ALT);
-    delay(200);
-   Keyboard.press('L');
-    delay(200);
-   Keyboard.release('LED_BUILTIN');
-    delay(200);
-Keyboard.releaseAll();
+    Keyboard.press('L');
+    Keyboard.releaseAll();
     // Simple debounce
     delay(300);
-    digitalWrite(pinLed, LOW);
+    
 
   }
 
@@ -373,7 +367,7 @@ void statecontrolFunction(){
     currentState++;
     }
   else{
-    currentState =0;
+    currentState=0;
   }
    digitalWrite(pinLed, LOW);//
     // Simple debounce
@@ -463,15 +457,24 @@ class Flasher
 };
 
 
-Flasher led1(profileLed1, 100, 400);
-Flasher led2(profileLed2, 100, 400);
+
+Flasher led1(profileLed1, 100, 600);
+Flasher led2(profileLed2, 100, 600);
+Flasher led11(profileLed1, 300, 600);
+Flasher led21(profileLed2, 300, 600);
 ///////////////////////////////////////////////
 
 void loop() {
+ if(muted){
  led1.Update();
- led2.Update();  
+ led2.Update();
+ }
+ if(muted2){
+ led11.Update();
+ //led21.Update(); 
+ }
 statecontrolFunction();
-  switch(currentState){
+     switch(currentState){
      case firstState :
      firstStatefunction();
      break;
@@ -483,9 +486,10 @@ statecontrolFunction();
      break;
 
     }
- 
+
   
 }
+
 
 
 
